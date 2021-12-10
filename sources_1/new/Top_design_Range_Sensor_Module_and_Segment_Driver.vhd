@@ -36,8 +36,10 @@ use IEEE.NUMERIC_STD.ALL;
 
 entity Top_design_Range_Sensor_Module_and_Segment_Driver is
     Port ( FPGA_clk : in STD_LOGIC;
+    
            Echo : in STD_LOGIC;
            Trigger : out STD_LOGIC;
+           
            TopsegA : out STD_LOGIC;
            TopsegB : out STD_LOGIC;
            TopsegC : out STD_LOGIC;
@@ -52,7 +54,16 @@ entity Top_design_Range_Sensor_Module_and_Segment_Driver is
            Topselect_Display_E : out STD_LOGIC;
            Topselect_Display_F : out STD_LOGIC;
            Topselect_Display_G : out STD_LOGIC;
-           Topselect_Display_H : out STD_LOGIC);
+           Topselect_Display_H : out STD_LOGIC;
+           
+           Top_IN1 : out STD_LOGIC;
+           Top_IN2 : out STD_LOGIC;
+           Top_IN3 : out STD_LOGIC;
+           Top_IN4 : out STD_LOGIC;
+           Top_ENA_switch : in STD_LOGIC;
+           Top_ENB_switch : in STD_LOGIC;
+           Top_ENA : out STD_LOGIC;
+           Top_ENB : out STD_LOGIC);
 end Top_design_Range_Sensor_Module_and_Segment_Driver;
 
 architecture Behavioral of Top_design_Range_Sensor_Module_and_Segment_Driver is
@@ -64,7 +75,8 @@ Port ( clk_range_sensor_module : in STD_LOGIC;
            trigger_range_sensor_module : out STD_LOGIC;
            Meters_range_sensor_module : out STD_LOGIC_VECTOR (3 downto 0);
            Decimeters_range_sensor_module : out STD_LOGIC_VECTOR (3 downto 0);
-           Centimeters_range_sensor_module : out STD_LOGIC_VECTOR (3 downto 0));
+           Centimeters_range_sensor_module : out STD_LOGIC_VECTOR (3 downto 0);
+           DistanceForMotor_range_sensor_module : out STD_LOGIC_VECTOR (8 downto 0));
 end component;
 
 component segmentDriver is
@@ -90,22 +102,36 @@ Port ( display_A : in STD_LOGIC_VECTOR (3 downto 0);
         clk : in STD_LOGIC);
 end component;
 
+component Motor_Driver
+Port (distance_motor_driver_module : in STD_LOGIC_VECTOR (8 downto 0);
+        IN1_motor_driver_module : out STD_LOGIC;
+        IN2_motor_driver_module : out STD_LOGIC;
+        IN3_motor_driver_module : out STD_LOGIC;
+        IN4_motor_driver_module : out STD_LOGIC;
+        clk_motor_driver_module : in STD_LOGIC);
+end component;
+
 
 -- Signal
 signal internal_Meters : STD_LOGIC_VECTOR (3 downto 0);
 signal internal_Decimeters : STD_LOGIC_VECTOR (3 downto 0);
 signal internal_Centimeters : STD_LOGIC_VECTOR (3 downto 0);
+signal internal_DistanceForMotor : STD_LOGIC_VECTOR (8 downto 0);
 
 begin
 
 -- UUT
+
+Top_ENA <= Top_ENA_switch;
+Top_ENB <= Top_ENB_switch;
 
 uut_Range_Sensor_Module : Range_Sensor_Module port map (clk_range_sensor_module => FPGA_clk,
                                                         echo_range_sensor_module => Echo,
                                                         trigger_range_sensor_module => Trigger,
                                                         Meters_range_sensor_module => internal_Meters,
                                                         Decimeters_range_sensor_module => internal_Decimeters,
-                                                        Centimeters_range_sensor_module => internal_Centimeters );
+                                                        Centimeters_range_sensor_module => internal_Centimeters,
+                                                        DistanceForMotor_range_sensor_module => internal_DistanceForMotor);
 
 uut_Segment_Driver : segmentDriver port map (display_A => internal_Centimeters,
                                              display_B => internal_Decimeters,
@@ -127,4 +153,11 @@ uut_Segment_Driver : segmentDriver port map (display_A => internal_Centimeters,
                                              select_Display_G => Topselect_Display_G,
                                              select_Display_H => Topselect_Display_H,
                                              clk => FPGA_clk);
+                                             
+uut_Motor_Driver : Motor_Driver port map (distance_motor_driver_module => internal_DistanceForMotor,
+                                          clk_motor_driver_module => FPGA_clk,
+                                          IN1_motor_driver_module => Top_IN1,
+                                          IN2_motor_driver_module => Top_IN2,
+                                          IN3_motor_driver_module => Top_IN3,
+                                          IN4_motor_driver_module => Top_IN4);
 end Behavioral;

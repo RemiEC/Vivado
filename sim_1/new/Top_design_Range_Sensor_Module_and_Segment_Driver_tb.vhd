@@ -41,9 +41,11 @@ end Top_design_Range_Sensor_Module_and_Segment_Driver_tb;
 architecture Behavioral of Top_design_Range_Sensor_Module_and_Segment_Driver_tb is
 
 component Top_design_Range_Sensor_Module_and_Segment_Driver is
-Port ( FPGA_clk : in STD_LOGIC;
+    Port ( FPGA_clk : in STD_LOGIC;
+    
            Echo : in STD_LOGIC;
            Trigger : out STD_LOGIC;
+           
            TopsegA : out STD_LOGIC;
            TopsegB : out STD_LOGIC;
            TopsegC : out STD_LOGIC;
@@ -54,12 +56,27 @@ Port ( FPGA_clk : in STD_LOGIC;
            Topselect_Display_A : out STD_LOGIC;
            Topselect_Display_B : out STD_LOGIC;
            Topselect_Display_C : out STD_LOGIC;
-           Topselect_Display_D : out STD_LOGIC);
+           Topselect_Display_D : out STD_LOGIC;
+           Topselect_Display_E : out STD_LOGIC;
+           Topselect_Display_F : out STD_LOGIC;
+           Topselect_Display_G : out STD_LOGIC;
+           Topselect_Display_H : out STD_LOGIC;
+           
+           Top_IN1 : out STD_LOGIC;
+           Top_IN2 : out STD_LOGIC;
+           Top_IN3 : out STD_LOGIC;
+           Top_IN4 : out STD_LOGIC;
+           Top_ENA_switch : in STD_LOGIC;
+           Top_ENB_switch : in STD_LOGIC;
+           Top_ENA : out STD_LOGIC;
+           Top_ENB : out STD_LOGIC);
 end component;
 
 signal FPGA_clk :  STD_LOGIC;
+
 signal Echo :  STD_LOGIC;
 signal Trigger : STD_LOGIC;
+
 signal TopsegA : STD_LOGIC;
 signal TopsegB : STD_LOGIC;
 signal TopsegC : STD_LOGIC;
@@ -72,6 +89,15 @@ signal Topselect_Display_B : STD_LOGIC;
 signal Topselect_Display_C : STD_LOGIC;
 signal Topselect_Display_D : STD_LOGIC;
 
+signal Top_IN1 : STD_LOGIC;
+signal Top_IN2 : STD_LOGIC;
+signal Top_IN3 : STD_LOGIC;
+signal Top_IN4 : STD_LOGIC;
+signal Top_ENA_switch : STD_LOGIC;
+signal Top_ENB_switch : STD_LOGIC;
+signal Top_ENA : STD_LOGIC;
+signal Top_ENB : STD_LOGIC;
+           
 constant clock_period: time := 10 ns;
   --signal stop_the_clock: boolean;
   
@@ -90,7 +116,15 @@ uut : Top_design_Range_Sensor_Module_and_Segment_Driver port map (FPGA_clk => FP
                                                                   Topselect_Display_A => Topselect_Display_A,
                                                                   Topselect_Display_B => Topselect_Display_B,
                                                                   Topselect_Display_C => Topselect_Display_C,
-                                                                  Topselect_Display_D => Topselect_Display_D);
+                                                                  Topselect_Display_D => Topselect_Display_D,
+                                                                  Top_IN1 => Top_IN1,
+                                                                  Top_IN2 => Top_IN2,
+                                                                  Top_IN3 => Top_IN3,
+                                                                  Top_IN4 => Top_IN4,
+                                                                  Top_ENA_switch => Top_ENA_switch,
+                                                                  Top_ENB_switch => Top_ENB_switch,
+                                                                  Top_ENA => Top_ENA,
+                                                                  Top_ENB => Top_ENB);
                                                                   
                                                                   
 clocking: process
@@ -105,6 +139,8 @@ clocking: process
 simulu: process
   begin
         Echo <= '0';
+        Top_ENA_switch <= '1';
+        Top_ENB_switch <= '1';
         
         
         wait for 20ms;

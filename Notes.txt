@@ -1,0 +1,1 @@
+On va relier ENA directement à switch 2 dans le TOP DESIGN

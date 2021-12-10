@@ -37,7 +37,8 @@ entity Range_Sensor_Module is
            trigger_range_sensor_module : out STD_LOGIC;
            Meters_range_sensor_module : out STD_LOGIC_VECTOR (3 downto 0);
            Decimeters_range_sensor_module : out STD_LOGIC_VECTOR (3 downto 0);
-           Centimeters_range_sensor_module : out STD_LOGIC_VECTOR (3 downto 0));
+           Centimeters_range_sensor_module : out STD_LOGIC_VECTOR (3 downto 0);
+           DistanceForMotor_range_sensor_module : out STD_LOGIC_VECTOR (8 downto 0));
 end Range_Sensor_Module;
 
 architecture Behavioral of Range_Sensor_Module is
@@ -79,7 +80,10 @@ signal internal_trigger : STD_LOGIC;
 
 begin
 
+DistanceForMotor_range_sensor_module <= internal_distance_9_bits;
 trigger_range_sensor_module <= internal_trigger;
+
+
 uut_trigger_generator : Trigger_Generator port map (clk => clk_range_sensor_module, 
                                                     trigger => internal_trigger);
 uut_distance_counter : Distance_Counter port map (clk => clk_range_sensor_module, 
