@@ -49,35 +49,52 @@ begin
 
     
 motor_driver : process (clk_motor_driver_module)
-    begin
-
-    if (clk_motor_driver_module'event and clk_motor_driver_module='1')
+variable speed: integer := 0;
+variable counter: integer := 100000;
+variable sens: integer := 0;
+begin
+    
+    if distance_motor_driver_module >= 25
     then
+        speed := 100000;
+        sens := 0; -- En avant
+    elsif (distance_motor_driver_module < 25 and distance_motor_driver_module >= 15) then
+        speed := 70000;
+        --(conv_integer(distance_motor_driver_module)-15) *10000;
+        sens := 0; -- En avant
+    elsif (distance_motor_driver_module < 15 and distance_motor_driver_module >= 10) then
+        speed := 0;
+        sens := 0; -- En avant
+    else
+        speed := 70000;
+        sens := 1; -- En arrière, 20 000 de speed ne suffit pas à le faire bouger
+    end if;
     
-    
-        if distance_motor_driver_module < "000011001" 
+    if (clk_motor_driver_module'event and clk_motor_driver_module='1') then
+        counter := counter+1;
+        if counter =99999
         then
-            IN1_motor_driver_module <= '0';
-            IN2_motor_driver_module <= '1';
-            IN3_motor_driver_module <= '0';
-            IN4_motor_driver_module <= '0';
-        elsif distance_motor_driver_module < "000110010" 
-        then
-            IN1_motor_driver_module <= '1';
-            IN2_motor_driver_module <= '0';
-            IN3_motor_driver_module <= '0';
-            IN4_motor_driver_module <= '0';
-        elsif distance_motor_driver_module < "001001011"
-        then
-            IN1_motor_driver_module <= '0';
-            IN2_motor_driver_module <= '0';
-            IN3_motor_driver_module <= '0';
-            IN4_motor_driver_module <= '1';
+            counter := 0;
+        end if;
+        
+        if counter < speed then
+            if sens = 0 then
+                IN1_motor_driver_module <= '1';
+                IN2_motor_driver_module <= '0';
+                IN3_motor_driver_module <= '1';
+                IN4_motor_driver_module <= '0';
+            else
+                IN1_motor_driver_module <= '0';
+                IN2_motor_driver_module <= '1';
+                IN3_motor_driver_module <= '0';
+                IN4_motor_driver_module <= '1';
+            end if;
         else
             IN1_motor_driver_module <= '0';
             IN2_motor_driver_module <= '0';
-            IN3_motor_driver_module <= '1';
+            IN3_motor_driver_module <= '0';
             IN4_motor_driver_module <= '0';
+        
         end if;
     end if;
     
