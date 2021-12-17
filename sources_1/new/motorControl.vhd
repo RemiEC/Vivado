@@ -25,51 +25,82 @@ use IEEE.STD_LOGIC_UNSIGNED.ALL;
 use IEEE.NUMERIC_STD.ALL;
 use IEEE.STD_LOGIC_ARITH.ALL;
 
--- Uncomment the following library declaration if using
--- arithmetic functions with Signed or Unsigned values
---use IEEE.NUMERIC_STD.ALL;
+entity Motor_Driver is
+    Port (right_distance_motor_driver_module : in STD_LOGIC_VECTOR (8 downto 0);
+        left_distance_motor_driver_module : in STD_LOGIC_VECTOR (8 downto 0);
+        IN1_right_motor_driver_module : out STD_LOGIC;
+        IN2_right_motor_driver_module : out STD_LOGIC;
+        IN3_left_motor_driver_module : out STD_LOGIC;
+        IN4_left_motor_driver_module : out STD_LOGIC;
+        clk_motor_driver_module : in STD_LOGIC);
+end Motor_Driver;
 
--- Uncomment the following library declaration if instantiating
--- any Xilinx leaf cells in this code.
---library UNISIM;
---use UNISIM.VComponents.all;
-
-entity motorControl is
-    Port ( meters_motor_control_module : in STD_LOGIC_VECTOR (3 downto 0);
-        decimeters_motor_control_module : in STD_LOGIC_VECTOR (3 downto 0);
-        centimeters_motor_control_module : in STD_LOGIC_VECTOR (3 downto 0);
-        IN1_motor_control_module : out STD_LOGIC;
-        IN2_motor_control_module : out STD_LOGIC;
-        IN3_motor_control_module : out STD_LOGIC;
-        IN4_motor_control_module : out STD_LOGIC;
-        clk_motor_control_module : in STD_LOGIC);
-end motorControl;
-
-architecture Behavioral of motorControl is
-signal distance : integer := meters_motor_control_module*100 + decimeters_motor_control_module*10 + centimeters_motor_control_module;
+architecture Behavioral of Motor_Driver is
 begin
-process (clk_motor_control_module, meters_motor_control_module, decimeters_motor_control_module, centimeters_motor_control_module)
-    begin
-    if distance <= 25 then
-        IN1_motor_control_module <= '0';
-        IN2_motor_control_module <= '1';
-        IN3_motor_control_module <= '0';
-        IN4_motor_control_module <= '0';
-    elsif distance <= 50 then
-        IN1_motor_control_module <= '1';
-        IN2_motor_control_module <= '0';
-        IN3_motor_control_module <= '0';
-        IN4_motor_control_module <= '0';
-    elsif distance <= 75 then
-        IN1_motor_control_module <= '0';
-        IN2_motor_control_module <= '0';
-        IN3_motor_control_module <= '0';
-        IN4_motor_control_module <= '1';
-    else
-        IN1_motor_control_module <= '0';
-        IN2_motor_control_module <= '0';
-        IN3_motor_control_module <= '1';
-        IN4_motor_control_module <= '0';
+
+motor_driver : process (clk_motor_driver_module)
+variable counter: integer := 100000;
+variable right_speed: integer := 0;
+variable right_sens: integer := 0;
+variable left_speed: integer := 0;
+variable left_sens: integer := 0;
+begin
+    
+    if (right_distance_motor_driver_module >= 20 and left_distance_motor_driver_module >= 20) then 
+        right_speed := 100000;
+        left_speed := 100000;
+        right_sens := 0; 
+        left_sens := 0;-- En avant
+    elsif (right_distance_motor_driver_module >= 10 and left_distance_motor_driver_module >= 20) then
+        right_speed := (right_distance_motor_driver_module-10)*10000;
+        left_speed := 100000;
+        right_sens := 0; 
+        left_sens := 0;-- En avant
+    elsif (right_distance_motor_driver_module >= 20 and left_distance_motor_driver_module >= 10) then
+        right_speed := 100000;
+        left_speed := (left_distance_motor_driver_module-10)*10000;
+        right_sens := 0; 
+        left_sens := 0; --20 000 de speed ne suffit pas à le faire bouger
+    elsif (right_distance_motor_driver_module < 10 and left_distance_motor_driver_module < 10) then
+        right_speed := 100000;
+        left_speed := 100000;
+        right_sens := 1; 
+        left_sens := 1;
     end if;
+    
+    if (clk_motor_driver_module'event and clk_motor_driver_module='1') then
+        counter := counter+1;
+        if counter =99999
+        then
+            counter := 0;
+        end if;
+        
+        if counter < right_speed then
+            if right_sens = 0 then
+                IN1_right_motor_driver_module <= '1';
+                IN2_right_motor_driver_module <= '0';
+            else
+                IN1_right_motor_driver_module <= '0';
+                IN2_right_motor_driver_module <= '1';
+            end if;
+        else
+            IN1_right_motor_driver_module <= '0';
+            IN2_right_motor_driver_module <= '0'; 
+        end if;
+        
+        if counter < left_speed then
+            if right_sens = 0 then
+                IN3_left_motor_driver_module <= '1';
+                IN4_left_motor_driver_module <= '0';
+            else
+                IN3_left_motor_driver_module <= '0';
+                IN4_left_motor_driver_module <= '1';
+            end if;
+        else
+            IN3_left_motor_driver_module <= '0';
+            IN4_left_motor_driver_module <= '0';
+        end if;
+    end if;
+    
     end process;
 end Behavioral;
